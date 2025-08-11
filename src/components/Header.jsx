@@ -19,7 +19,7 @@ export default function Header() {
             transition={{ duration: 3, repeat: Infinity }}
           />
           <span className="text-xl font-bold tracking-wide">
-            Dota2 Stream Hub
+            Dota2HubPub
           </span>
         </motion.div>
 
