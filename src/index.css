@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body { @apply bg-gray-50 text-gray-900 font-sans; }
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #121212; /* Тот же фон, что и в Home */
+  color: #f5f5f5; /* Светлый текст по умолчанию */
+}
