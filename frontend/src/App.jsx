@@ -1,4 +1,3 @@
-// src/App.jsx
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import Header from "./components/Header";
@@ -8,6 +7,7 @@ import Login from "./pages/Login";
 import AdminDashboard from "./pages/AdminDashboard";
 import UserDashboard from "./pages/UserDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
+import SteamLoginSuccess from "./pages/SteamLoginSuccess"; // ✅ добавили импорт
 
 export default function App() {
   return (
@@ -19,8 +19,25 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
 
-            <Route path="/admin" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
-            <Route path="/user" element={<ProtectedRoute role="user"><UserDashboard /></ProtectedRoute>} />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute role="admin">
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/userdashboard"
+              element={
+                <ProtectedRoute role="user">
+                  <UserDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* ✅ Маршрут для Steam авторизации */}
+            <Route path="/SteamLoginSuccess" element={<SteamLoginSuccess />} />
           </Routes>
         </main>
         <Footer />

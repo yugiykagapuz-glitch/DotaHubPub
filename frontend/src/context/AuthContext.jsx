@@ -1,38 +1,42 @@
-// src/context/AuthContext.jsx
-import { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 
-const AuthContext = createContext();
+export const AuthContext = createContext(null); // ✅ экспортируем явно
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
 
-  const login = (username, role) => {
-    setUser({ username, role });
+  // Автовход, если токен уже есть в localStorage
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      fetch("http://localhost:5000/api/user/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((res) => res.ok ? res.json() : null)
+        .then((data) => {
+          if (data) setUser(data);
+        })
+        .catch((err) => console.error("Ошибка при автологине:", err));
+    }
+  }, []);
+
+  const login = (token) => {
+    if (!token) return;
+    localStorage.setItem("token", token);
+    fetch("http://localhost:5000/api/user/me", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => {
+        if (data) setUser(data);
+      })
+      .catch((err) => console.error("Ошибка при входе:", err));
   };
 
   const logout = () => {
     localStorage.removeItem("token");
     setUser(null);
   };
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      fetch("http://localhost:5000/api/verify", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.valid) {
-            setUser({ username: data.user.username, role: data.user.role });
-          } else {
-            logout();
-          }
-        })
-        .catch(() => logout());
-    }
-  }, []);
 
   return (
     <AuthContext.Provider value={{ user, login, logout }}>
@@ -41,4 +45,4 @@ export function AuthProvider({ children }) {
   );
 }
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => useContext(AuthContext); // ✅ удобный хук

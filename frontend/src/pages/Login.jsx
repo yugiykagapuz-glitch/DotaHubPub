@@ -1,100 +1,104 @@
 // src/pages/Login.jsx
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 function ParticlesBackground() {
   return (
-    <div className="absolute inset-0 z-0">
-      <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a1a] via-[#121212] to-[#0a0a0a]" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(183,28,28,0.15),transparent)]" />
-    </div>
+    <canvas
+      id="particles-canvas"
+      className="absolute inset-0 z-0 pointer-events-none"
+    ></canvas>
   );
 }
 
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const navigate = useNavigate();
   const { login } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleLocalLogin = async (e) => {
     e.preventDefault();
-    setError("");
+    const success = await login(username, password);
+    if (success) navigate("/");
+  };
 
-    try {
-      const res = await fetch("http://localhost:5000/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.message || "Ошибка входа");
-        return;
-      }
-
-      localStorage.setItem("token", data.token);
-      login(data.username, data.role);
-      navigate(data.role === "admin" ? "/admin" : "/user");
-    } catch (err) {
-      setError("Ошибка соединения с сервером");
-    }
+  const handleSteamLogin = () => {
+    window.location.href = "http://localhost:5000/api/auth/steam";
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-[#121212] overflow-hidden">
+    <div className="bg-[#121212] text-gray-100 min-h-screen flex items-center justify-center relative overflow-hidden">
       <ParticlesBackground />
 
+      {/* Красная подсветка фона */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(183,28,28,0.2),transparent)] animate-pulse z-0" />
+
       <motion.div
+        className="bg-[#1e1e1e] rounded-xl shadow-lg border border-red-800/30 p-8 w-full max-w-md relative z-10"
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
-        className="relative z-10 bg-[#1e1e1e]/90 border border-red-800/40 rounded-2xl p-10 shadow-lg shadow-black/60 w-full max-w-md backdrop-blur-md"
       >
-        <h1 className="text-4xl font-extrabold text-center bg-gradient-to-r from-red-600 to-red-400 bg-clip-text text-transparent mb-8">
-          Вход в DotaHub
+        <h1 className="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-red-600 to-red-400 bg-clip-text text-transparent">
+          Авторизация
         </h1>
 
-        {error && (
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-red-400 text-center mb-4"
-          >
-            {error}
-          </motion.p>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <motion.input
+        {/* Локальная авторизация */}
+        <form onSubmit={handleLocalLogin} className="space-y-4">
+          <input
             type="text"
             placeholder="Логин"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full p-3 rounded-lg bg-[#2a2a2a]/80 border border-red-800/30 text-gray-200 placeholder-gray-500 focus:outline-none focus:border-red-500 transition"
-            whileFocus={{ scale: 1.02 }}
+            className="w-full px-4 py-2 rounded-lg bg-[#121212] border border-gray-700 focus:outline-none focus:border-red-500"
           />
-          <motion.input
+          <input
             type="password"
             placeholder="Пароль"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-3 rounded-lg bg-[#2a2a2a]/80 border border-red-800/30 text-gray-200 placeholder-gray-500 focus:outline-none focus:border-red-500 transition"
-            whileFocus={{ scale: 1.02 }}
+            className="w-full px-4 py-2 rounded-lg bg-[#121212] border border-gray-700 focus:outline-none focus:border-red-500"
           />
-          <motion.button
+          <button
             type="submit"
-            className="w-full py-3 rounded-lg font-bold bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 transition duration-300 shadow-lg hover:shadow-red-600/50"
-            whileTap={{ scale: 0.97 }}
+            className="w-full py-2 bg-red-600 hover:bg-red-700 rounded-lg font-semibold shadow-lg hover:shadow-red-600/50 transition duration-300"
           >
             Войти
-          </motion.button>
+          </button>
         </form>
+
+        {/* Разделитель */}
+        <div className="flex items-center my-6">
+          <div className="flex-1 h-px bg-gray-700" />
+          <span className="px-3 text-gray-400 text-sm">или</span>
+          <div className="flex-1 h-px bg-gray-700" />
+        </div>
+
+        {/* Steam авторизация */}
+        <button
+          onClick={handleSteamLogin}
+          className="w-full py-2 bg-[#171a21] hover:bg-[#1b2838] rounded-lg font-semibold shadow-lg hover:shadow-gray-700/50 transition duration-300 flex items-center justify-center gap-3"
+        >
+          <img
+            src="https://community.cloudflare.steamstatic.com/public/shared/images/header/logo_steam.svg"
+            alt="Steam"
+            className="h-5"
+          />
+          Войти через Steam
+        </button>
+
+        <p className="mt-6 text-center text-gray-400 text-sm">
+          <Link
+            to="/"
+            className="text-red-500 hover:underline"
+          >
+            ← Вернуться на главную
+          </Link>
+        </p>
       </motion.div>
     </div>
   );
